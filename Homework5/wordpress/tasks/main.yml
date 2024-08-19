@@ -1,0 +1,29 @@
+- name: Download wordpress
+  ansible.builtin.get_url:
+    url: "{{ wordpress_url }}"
+    dest: "{{ wordpress_dest }}"
+
+- name: Extract wordpress
+  ansible.builtin.unarchive:
+    src: "{{ wordpress_dest }}"
+    dest: /tmp
+    remote_src: yes
+
+- name: Copy file with owner and permissions
+  ansible.builtin.copy:
+    src: /tmp/wordpress/.
+    dest: /var/www/html
+    owner: "{{ wordpress_user }}"
+    group: "{{ wordpress_group }}"
+    mode: '0755'
+    remote_src: yes
+
+- name: Remove file
+  ansible.builtin.file:
+    path: /var/www/html/index.html
+    state: absent
+
+- name: Restart apache
+  ansible.builtin.service:
+    name: apache2
+    state: restarted
